@@ -174,7 +174,7 @@ def main():
     args = ap.parse_args()
 
     electrons, positrons = parse_pairs_ascii(args.pairs_dat)
-    write_openpmd(args.out, electrons, positron,
+    write_openpmd(args.out, electrons, positrons,
                  weight_scale=args.weight_scale,
                  iteration=args.iteration)
 
