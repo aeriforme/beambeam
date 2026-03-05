@@ -51,44 +51,46 @@ def parse_pairs_ascii(path: str):
       electrons: dict of arrays {E, bx, by, bz, x_nm, y_nm, z_nm}
       positrons: same
     """
-    # Load only first 7 columns; ignore trailing numbers
-    data = []
-    with open(path, "r") as f:
-        for line in f:
-            s = line.strip()
-            if not s or s.startswith("#"):
-                continue
-            parts = s.split()
-            if len(parts) < 7:
-                continue
-            try:
-                vals = [float(parts[i]) for i in range(7)]
-            except ValueError:
-                continue
-            data.append(vals)
+    # Reads only the first 7 columns; ignores any extras
+    arr = np.loadtxt(
+        path,
+        comments="#",
+        usecols=(0, 1, 2, 3, 4, 5, 6),
+        dtype=np.float64,
+    )
 
-    if not data:
+    # Handle the edge case of a single valid line -> shape (7,)
+    if arr.ndim == 1:
+        arr = arr.reshape(1, -1)
+
+    if arr.size == 0:
         raise ValueError(f"No valid particle rows found in {path}")
 
-    arr = np.asarray(data, dtype=np.float64)
-    E = arr[:, 0]
-    bx, by, bz = arr[:, 1], arr[:, 2], arr[:, 3]
-    x_nm, y_nm, z_nm = arr[:, 4], arr[:, 5], arr[:, 6]
+    E  = arr[:, 0]
+    bx = arr[:, 1]
+    by = arr[:, 2]
+    bz = arr[:, 3]
+    x_nm = arr[:, 4]
+    y_nm = arr[:, 5]
+    z_nm = arr[:, 6]
 
-    #Distinguish particle species based on sign
     ele_mask = E > 0
     pos_mask = E < 0
-    
-    #Conversion to particle species, of which we only need electrons and positrons
-    electrons = dict(E=np.abs(E[ele_mask]), bx=bx[ele_mask], by=by[ele_mask], bz=bz[ele_mask],
-                     x_nm=x_nm[ele_mask], y_nm=y_nm[ele_mask], z_nm=z_nm[ele_mask])
 
-    positrons = dict(E=np.abs(E[pos_mask]), bx=bx[pos_mask], by=by[pos_mask], bz=bz[pos_mask],
-                     x_nm=x_nm[pos_mask], y_nm=y_nm[pos_mask], z_nm=z_nm[pos_mask])
+    electrons = dict(
+        E=np.abs(E[ele_mask]),
+        bx=bx[ele_mask], by=by[ele_mask], bz=bz[ele_mask],
+        x_nm=x_nm[ele_mask], y_nm=y_nm[ele_mask], z_nm=z_nm[ele_mask],
+    )
+
+    positrons = dict(
+        E=np.abs(E[pos_mask]),
+        bx=bx[pos_mask], by=by[pos_mask], bz=bz[pos_mask],
+        x_nm=x_nm[pos_mask], y_nm=y_nm[pos_mask], z_nm=z_nm[pos_mask],
+    )
 
     return electrons, positrons
-
-
+  
 def momentum_gev_c(particles: dict):
     """
     Compute p components in GeV/c.
