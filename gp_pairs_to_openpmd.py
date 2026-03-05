@@ -24,6 +24,7 @@ Output openPMD:
 import argparse
 import math
 import numpy as np
+from scipy import constants as const
 
 try:
     import openpmd_api as io
@@ -38,10 +39,10 @@ except ImportError as e:
     ) from e
 
 
-# Physical constants
-C = 299_792_458.0  # m/s
-ELECTRON_MASS_GEV = 0.00051099895000  # GeV (mc^2)
-GEV_C_TO_SI = 5.344286e-19  # (GeV/c) -> (kg*m/s)
+# Physical constants from scipy.constants
+C = const.c  # speed of light (m/s)
+ELECTRON_MASS_GEV = const.m_e * C**2 / const.e / 1e9 # electron rest mass energy in GeV
+GEV_C_TO_SI = (const.e * 1e9) / C # conversion: (GeV/c) → (kg m/s)
 
 #Let's step through the GP file
 def parse_pairs_ascii(path: str):
