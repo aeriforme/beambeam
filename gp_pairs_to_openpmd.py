@@ -94,20 +94,20 @@ def parse_pairs_ascii(path: str):
 def momentum_gev_c(particles: dict):
     """
     Compute p components in GeV/c.
+    Assumes:
+      beta_x, beta_y, beta_z = v_x/c, v_y/c, v_z/c
+      E is total energy in GeV (includes rest mass)
     """
     E = particles["E"]
     bx, by, bz = particles["bx"], particles["by"], particles["bz"]
-    
-    #magnitude of beta
-    beta_mag = np.sqrt(bx*bx + by*by + bz*bz)
-    beta_mag = np.where(beta_mag > 0, beta_mag, 1.0)  # avoid divide-by-zero
-    nx, ny, nz = bx/beta_mag, by/beta_mag, bz/beta_mag
 
-    #E is total energy in GeV (includes rest mass), p = sqrt(E^2 - m^2)
+    # total momentum magnitude (GeV/c)
     p_mag = np.sqrt(np.maximum(E*E - ELECTRON_MASS_GEV**2, 0.0))
-    px, py, pz = nx*p_mag, ny*p_mag, nz*p_mag
-    return px, py, pz
+    px = bx * p_mag
+    py = by * p_mag
+    pz = bz * p_mag
 
+    return px, py, pz
 
 def write_openpmd(out_path: str, electrons: dict, positrons: dict, weight_scale: float,
                   iteration: int = 0):
