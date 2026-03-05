@@ -151,6 +151,8 @@ def write_openpmd(out_path: str, electrons: dict, positrons: dict, weight_scale:
             rec.store_chunk(arr_p, offset=[0], extent=[n])
             rec.unit_SI = 1.0  # already SI
 
+        #rec should carry an attribute that carries their dimension 
+
         recw = species["weighting"][io.Record_Component.SCALAR]
         recw.reset_dataset(io.Dataset(w.dtype, extent=[n]))
         recw.store_chunk(w, offset=[0], extent=[n])
